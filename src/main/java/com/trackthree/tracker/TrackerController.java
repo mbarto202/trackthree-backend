@@ -36,7 +36,7 @@
 */
 
 
-package com.trackthree.controller;
+package com.trackthree.tracker;
 
 import com.trackthree.model.TrackerEntry;
 import org.springframework.web.bind.annotation.*;
