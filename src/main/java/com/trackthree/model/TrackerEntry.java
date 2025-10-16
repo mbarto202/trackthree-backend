@@ -1,14 +1,20 @@
 package com.trackthree.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDate;
 
+@Entity
 public class TrackerEntry {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private LocalDate date;
     private int calories;
     private int protein;
     private int water;
 
-    // Constructors
     public TrackerEntry() {}
 
     public TrackerEntry(LocalDate date, int calories, int protein, int water) {
@@ -18,7 +24,10 @@ public class TrackerEntry {
         this.water = water;
     }
 
-    // Getters and setters
+    public Long getId() {
+        return id;
+    }
+
     public LocalDate getDate() {
         return date;
     }
