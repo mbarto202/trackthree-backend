@@ -1,4 +1,4 @@
-package com.trackthree.model;
+package com.trackthree.tracker.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;

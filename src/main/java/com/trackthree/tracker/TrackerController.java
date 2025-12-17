@@ -1,7 +1,8 @@
 package com.trackthree.tracker;
 
-import com.trackthree.model.TrackerEntry;
-import com.trackthree.repository.TrackerEntryRepository;
+import com.trackthree.tracker.model.TrackerEntry;
+import com.trackthree.tracker.repository.TrackerEntryRepository;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
