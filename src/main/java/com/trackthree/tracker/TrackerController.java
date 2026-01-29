@@ -15,6 +15,12 @@ public class TrackerController {
 
     private final TrackerEntryRepository repository;
 
+    private static final Set<String> ALLOWED_CLIENT_CODES = Set.of(
+        "TT-MICHAEL",
+        "TT-CLIENT1",
+        "TT-CLIENT2"
+    );
+
     public TrackerController(TrackerEntryRepository repository) {
         this.repository = repository;
     }
