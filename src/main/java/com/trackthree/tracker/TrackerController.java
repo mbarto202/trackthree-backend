@@ -64,4 +64,19 @@ public class TrackerController {
         }
         return ResponseEntity.ok(repository.findAllByClientCodeOrderByDateDesc(clientCode));
     }
+
+    @GetMapping("/validate")
+    public ResponseEntity<Void> validateClientCode(@RequestParam String clientCode) {
+
+        if (clientCode == null || clientCode.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (!ALLOWED_CLIENT_CODES.contains(clientCode)) {
+            return ResponseEntity.status(403).build();
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
 }
