@@ -62,6 +62,11 @@ public class TrackerController {
         if (clientCode == null || clientCode.isBlank()) {
             return ResponseEntity.badRequest().build();
         }
+
+        if (!ALLOWED_CLIENT_CODES.contains(clientCode)) {
+            return ResponseEntity.status(403).build();
+        }
+
         return ResponseEntity.ok(repository.findAllByClientCodeOrderByDateDesc(clientCode));
     }
 
