@@ -16,7 +16,7 @@ public class TrackerController {
     private final TrackerEntryRepository repository;
 
     private static final Set<String> ALLOWED_CLIENT_CODES = Set.of(
-    "TT-MAX8", // Mine
+    "TT-BUZZ99", // Admin
     "TT-7K3P",
     "TT-Q5A8",
     "TT-X8P3",
@@ -83,5 +83,4 @@ public class TrackerController {
 
         return ResponseEntity.ok().build();
     }
-
 }
