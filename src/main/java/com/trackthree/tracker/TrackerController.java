@@ -83,4 +83,18 @@ public class TrackerController {
 
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/history")
+    public ResponseEntity<String> resetHistory(@RequestParam String clientCode) {
+        if (clientCode == null || clientCode.isBlank()) {
+            return ResponseEntity.badRequest().body("clientCode is required");
+        }
+
+        if (!"TT-BUZZ99".equals(clientCode)) {
+            return ResponseEntity.status(403).body("Admin access required");
+        }
+
+        repository.deleteAll();
+        return ResponseEntity.ok("All history deleted.");
+    }
 }
