@@ -10,4 +10,5 @@ import com.trackthree.tracker.model.TrackerEntry;
 public interface TrackerEntryRepository extends JpaRepository<TrackerEntry, Long> {
     Optional<TrackerEntry> findByClientCodeAndDate(String clientCode, LocalDate date);
     List<TrackerEntry> findAllByClientCodeOrderByDateDesc(String clientCode);
+    List<TrackerEntry> findAllByOrderByDateDesc();
 }
