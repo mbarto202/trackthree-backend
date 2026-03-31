@@ -14,6 +14,7 @@ import java.util.List;
 public class TrackerController {
 
     private final TrackerEntryRepository repository;
+    private static final String ADMIN_CODE = "TT-BUZZ99";
 
     private static final Set<String> ALLOWED_CLIENT_CODES = Set.of(
     "TT-BUZZ99", // Admin
@@ -65,6 +66,10 @@ public class TrackerController {
 
         if (!ALLOWED_CLIENT_CODES.contains(clientCode)) {
             return ResponseEntity.status(403).build();
+        }
+
+        if (ADMIN_CODE.equals(clientCode)) {
+            return ResponseEntity.ok(repository.findAllByOrderByDateDesc());
         }
 
         return ResponseEntity.ok(repository.findAllByClientCodeOrderByDateDesc(clientCode));
