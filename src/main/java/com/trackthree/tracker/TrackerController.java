@@ -95,7 +95,7 @@ public class TrackerController {
             return ResponseEntity.badRequest().body("clientCode is required");
         }
 
-        if (!"TT-BUZZ99".equals(clientCode)) {
+        if (!ADMIN_CODE.equals(clientCode)) {
             return ResponseEntity.status(403).body("Admin access required");
         }
 
