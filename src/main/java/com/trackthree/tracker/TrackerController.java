@@ -102,4 +102,25 @@ public class TrackerController {
         repository.deleteAll();
         return ResponseEntity.ok("All history deleted.");
     }
+
+    @DeleteMapping("/entry/{id}")
+    public ResponseEntity<String> deleteEntry(
+            @PathVariable Long id,
+            @RequestParam String clientCode) {
+
+        if (clientCode == null || clientCode.isBlank()) {
+            return ResponseEntity.badRequest().body("clientCode is required");
+        }
+
+        if (!ADMIN_CODE.equals(clientCode)) {
+            return ResponseEntity.status(403).body("Admin access required");
+        }
+
+        if (!repository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        repository.deleteById(id);
+        return ResponseEntity.ok("Entry deleted");
+    }
 }
