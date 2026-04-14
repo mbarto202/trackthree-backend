@@ -18,11 +18,7 @@ public class TrackerController {
 
     private static final Set<String> ALLOWED_CLIENT_CODES = Set.of(
     "TT-BUZZ99", // Admin
-    "TT-7K3P",
-    "TT-Q5A8",
-    "TT-X8P3",
-    "TT-L7R9",
-    "TT-9F2K"
+    "TT-DEMO00"
 );
 
 
