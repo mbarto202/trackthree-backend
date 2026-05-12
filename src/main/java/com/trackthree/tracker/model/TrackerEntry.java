@@ -34,7 +34,7 @@ public class TrackerEntry {
         this.water = water;
     }
 
-     public Long getId() { return id; }
+    public Long getId() { return id; }
 
     public String getClientCode() { return clientCode; }
     public void setClientCode(String clientCode) { this.clientCode = clientCode; }
