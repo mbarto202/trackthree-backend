@@ -20,8 +20,13 @@ public class TrackerEntry {
     @Column(nullable = false)
     private LocalDate date;
 
+    @Column(nullable = false)
     private int calories;
+
+    @Column(nullable = false)
     private int protein;
+
+    @Column(nullable = false)
     private int water;
 
     public TrackerEntry() {}
