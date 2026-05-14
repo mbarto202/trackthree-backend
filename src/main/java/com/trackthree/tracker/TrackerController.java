@@ -5,8 +5,6 @@ import com.trackthree.tracker.repository.TrackerEntryRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Set;
-
-
 import java.util.List;
 
 @RestController
@@ -17,7 +15,7 @@ public class TrackerController {
     private static final String ADMIN_CODE = "TT-BUZZ99";
 
     private static final Set<String> ALLOWED_CLIENT_CODES = Set.of(
-    "TT-BUZZ99", // Admin
+    ADMIN_CODE,
     "TT-DEMO00"
 );
 
