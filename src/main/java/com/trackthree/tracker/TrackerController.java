@@ -117,4 +117,16 @@ public class TrackerController {
         repository.deleteById(id);
         return ResponseEntity.ok("Entry deleted");
     }
+
+    private boolean isMissingClientCode(String clientCode) {
+    return clientCode == null || clientCode.isBlank();
+}
+
+private boolean isValidClientCode(String clientCode) {
+    return ALLOWED_CLIENT_CODES.contains(clientCode);
+}
+
+private boolean isAdmin(String clientCode) {
+    return ADMIN_CODE.equals(clientCode);
+}
 }
