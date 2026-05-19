@@ -54,7 +54,7 @@ public class TrackerController {
 
     @GetMapping("/history")
     public ResponseEntity<List<TrackerEntry>> getHistory(@RequestParam String clientCode) {
-        if (clientCode == null || clientCode.isBlank()) {
+        if (isMissingClientCode(clientCode)) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -72,7 +72,7 @@ public class TrackerController {
     @GetMapping("/validate")
     public ResponseEntity<Void> validateClientCode(@RequestParam String clientCode) {
 
-        if (clientCode == null || clientCode.isBlank()) {
+        if (isMissingClientCode(clientCode)) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -85,7 +85,7 @@ public class TrackerController {
 
     @DeleteMapping("/history")
     public ResponseEntity<String> resetHistory(@RequestParam String clientCode) {
-        if (clientCode == null || clientCode.isBlank()) {
+        if (isMissingClientCode(clientCode)) {
             return ResponseEntity.badRequest().body("clientCode is required");
         }
 
@@ -102,7 +102,7 @@ public class TrackerController {
             @PathVariable Long id,
             @RequestParam String clientCode) {
 
-        if (clientCode == null || clientCode.isBlank()) {
+        if (isMissingClientCode(clientCode)) {
             return ResponseEntity.badRequest().body("clientCode is required");
         }
 
