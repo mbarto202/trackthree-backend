@@ -26,7 +26,7 @@ public class TrackerController {
 
     @PostMapping("/log")
     public ResponseEntity<String> logEntry(@RequestBody TrackerEntry entry) {
-        if (entry.getClientCode() == null || entry.getClientCode().isBlank()) {
+        if (isMissingClientCode(entry.getClientCode())) {
             return ResponseEntity.badRequest().body("clientCode is required");
         }
         // Reject unknown client codes
