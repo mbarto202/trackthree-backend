@@ -30,7 +30,7 @@ public class TrackerController {
             return ResponseEntity.badRequest().body("clientCode is required");
         }
         // Reject unknown client codes
-    if (!ALLOWED_CLIENT_CODES.contains(entry.getClientCode())) {
+    if (!isValidClientCode(entry.getClientCode())) {
         return ResponseEntity.status(403).body("Invalid client code");
     }
         if (entry.getDate() == null) {
@@ -58,7 +58,7 @@ public class TrackerController {
             return ResponseEntity.badRequest().build();
         }
 
-        if (!ALLOWED_CLIENT_CODES.contains(clientCode)) {
+        if (!isValidClientCode(clientCode)) {
             return ResponseEntity.status(403).build();
         }
 
