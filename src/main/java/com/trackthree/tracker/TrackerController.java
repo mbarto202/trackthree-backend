@@ -62,7 +62,7 @@ public class TrackerController {
             return ResponseEntity.status(403).build();
         }
 
-        if (ADMIN_CODE.equals(clientCode)) {
+        if (isAdmin(clientCode)) {
             return ResponseEntity.ok(repository.findAllByOrderByDateDesc());
         }
 
@@ -89,7 +89,7 @@ public class TrackerController {
             return ResponseEntity.badRequest().body("clientCode is required");
         }
 
-        if (!ADMIN_CODE.equals(clientCode)) {
+        if (!isAdmin(clientCode)) {
             return ResponseEntity.status(403).body("Admin access required");
         }
 
@@ -106,7 +106,7 @@ public class TrackerController {
             return ResponseEntity.badRequest().body("clientCode is required");
         }
 
-        if (!ADMIN_CODE.equals(clientCode)) {
+        if (!isAdmin(clientCode)) {
             return ResponseEntity.status(403).body("Admin access required");
         }
 
