@@ -1,27 +1,25 @@
 package com.trackthree.tracker;
 
+import com.trackthree.tracker.model.Client;
 import com.trackthree.tracker.model.TrackerEntry;
+import com.trackthree.tracker.repository.ClientRepository;
 import com.trackthree.tracker.repository.TrackerEntryRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Set;
+
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/tracker")
 public class TrackerController {
 
     private final TrackerEntryRepository repository;
-    private static final String ADMIN_CODE = "TT-BUZZ99";
+    private final ClientRepository clientRepository;
 
-    private static final Set<String> ALLOWED_CLIENT_CODES = Set.of(
-    ADMIN_CODE,
-    "TT-DEMO00"
-);
-
-
-    public TrackerController(TrackerEntryRepository repository) {
+    public TrackerController(TrackerEntryRepository repository, ClientRepository clientRepository) {
         this.repository = repository;
+        this.clientRepository = clientRepository;
     }
 
     @PostMapping("/log")
@@ -30,9 +28,9 @@ public class TrackerController {
             return ResponseEntity.badRequest().body("clientCode is required");
         }
         // Reject unknown client codes
-    if (!isValidClientCode(entry.getClientCode())) {
-        return ResponseEntity.status(403).body("Invalid client code");
-    }
+        if (!isValidClientCode(entry.getClientCode())) {
+            return ResponseEntity.status(403).body("Invalid client code");
+        }
         if (entry.getDate() == null) {
             return ResponseEntity.badRequest().body("date is required");
         }
@@ -76,7 +74,7 @@ public class TrackerController {
             return ResponseEntity.badRequest().build();
         }
 
-        if (!ALLOWED_CLIENT_CODES.contains(clientCode)) {
+        if (!isValidClientCode(clientCode)) {
             return ResponseEntity.status(403).build();
         }
 
@@ -119,14 +117,15 @@ public class TrackerController {
     }
 
     private boolean isMissingClientCode(String clientCode) {
-    return clientCode == null || clientCode.isBlank();
-}
+        return clientCode == null || clientCode.isBlank();
+    }
 
-private boolean isValidClientCode(String clientCode) {
-    return ALLOWED_CLIENT_CODES.contains(clientCode);
-}
+    private boolean isValidClientCode(String clientCode) {
+        return clientRepository.existsById(clientCode);
+    }
 
-private boolean isAdmin(String clientCode) {
-    return ADMIN_CODE.equals(clientCode);
-}
+    private boolean isAdmin(String clientCode) {
+        Optional<Client> client = clientRepository.findById(clientCode);
+        return client.map(Client::isAdmin).orElse(false);
+    }
 }
