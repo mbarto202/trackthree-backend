@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.UUID;
 
 @RestController
@@ -22,8 +23,7 @@ public class ClientController {
 
     @PostMapping
     public ResponseEntity<?> createClient(
-            @RequestHeader("X-Admin-Code") String adminCode,
-            @RequestBody CreateClientRequest request) {
+            @RequestHeader("X-Admin-Code") String adminCode) {
 
         boolean isAdmin = clientRepository.findById(adminCode)
                 .map(Client::isAdmin)
@@ -34,23 +34,26 @@ public class ClientController {
                     .body("Admin access required");
         }
 
-        if (request.code() == null || request.code().isBlank()) {
-            return ResponseEntity.badRequest()
-                    .body("code is required");
-        }
-
-        if (clientRepository.existsById(request.code())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("Client code already exists");
-        }
-
-        Client client = new Client(request.code(), false);
+        String clientCode = generateUniqueClientCode();
+        Client client = new Client(clientCode, false);
         clientRepository.save(client);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(client);
     }
 
-    public record CreateClientRequest(String code) {
+    private String generateUniqueClientCode() {
+        String code;
+
+        do {
+            String randomPart = UUID.randomUUID()
+                    .toString()
+                    .substring(0, 6)
+                    .toUpperCase();
+
+            code = "TT-" + randomPart;
+        } while (clientRepository.existsById(code));
+
+        return code;
     }
 }
