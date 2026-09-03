@@ -1,15 +1,17 @@
 package com.trackthree.tracker;
 
-import com.trackthree.tracker.model.Client;
-import com.trackthree.tracker.repository.ClientRepository;
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.UUID;
+import com.trackthree.tracker.model.Client;
+import com.trackthree.tracker.repository.ClientRepository;
 
 @RestController
 @RequestMapping("/api/clients")
@@ -25,11 +27,7 @@ public class ClientController {
     public ResponseEntity<?> createClient(
             @RequestHeader("X-Admin-Code") String adminCode) {
 
-        boolean isAdmin = clientRepository.findById(adminCode)
-                .map(Client::isAdmin)
-                .orElse(false);
-
-        if (!isAdmin) {
+        if (!isAdmin(adminCode)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Admin access required");
         }
@@ -40,6 +38,25 @@ public class ClientController {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(client);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getClients(
+            @RequestHeader("X-Admin-Code") String adminCode) {
+
+        if (!isAdmin(adminCode)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Admin access required");
+        }
+
+        return ResponseEntity.ok(
+                clientRepository.findAllByAdminFalseOrderByCodeAsc());
+    }
+
+    private boolean isAdmin(String clientCode) {
+        return clientRepository.findById(clientCode)
+                .map(Client::isAdmin)
+                .orElse(false);
     }
 
     private String generateUniqueClientCode() {
