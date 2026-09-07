@@ -12,11 +12,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -41,7 +43,7 @@ class ClientControllerTests {
     @Test
     void adminCanCreateClient() throws Exception {
         MvcResult result = mockMvc.perform(post("/api/clients")
-                        .header("X-Admin-Code", "TT-ADMIN01"))
+                .header("X-Admin-Code", "TT-ADMIN01"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.code").value(matchesPattern("TT-[0-9A-F]{6}")))
                 .andExpect(jsonPath("$.admin").value(false))
@@ -54,7 +56,7 @@ class ClientControllerTests {
     @Test
     void nonAdminCannotCreateClient() throws Exception {
         mockMvc.perform(post("/api/clients")
-                        .header("X-Admin-Code", "TT-CLIENT01"))
+                .header("X-Admin-Code", "TT-CLIENT01"))
                 .andExpect(status().isForbidden());
     }
 
@@ -77,7 +79,7 @@ class ClientControllerTests {
 
     private MvcResult createClientAsAdmin() throws Exception {
         return mockMvc.perform(post("/api/clients")
-                        .header("X-Admin-Code", "TT-ADMIN01"))
+                .header("X-Admin-Code", "TT-ADMIN01"))
                 .andExpect(status().isCreated())
                 .andReturn();
     }
