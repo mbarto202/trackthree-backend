@@ -77,6 +77,20 @@ class ClientControllerTests {
         assertNotEquals(firstCode, secondCode);
     }
 
+    @Test
+    void adminCanListRegularClients() throws Exception {
+        clientRepository.save(new Client("TT-AAA111", false));
+        clientRepository.save(new Client("TT-ZZZ999", false));
+
+        mockMvc.perform(get("/api/clients")
+                .header("X-Admin-Code", "TT-ADMIN01"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].code").value("TT-AAA111"))
+                .andExpect(jsonPath("$[1].code").value("TT-CLIENT01"))
+                .andExpect(jsonPath("$[2].code").value("TT-ZZZ999"));
+    }
+
     private MvcResult createClientAsAdmin() throws Exception {
         return mockMvc.perform(post("/api/clients")
                 .header("X-Admin-Code", "TT-ADMIN01"))
