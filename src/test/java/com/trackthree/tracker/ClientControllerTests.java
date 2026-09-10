@@ -91,6 +91,19 @@ class ClientControllerTests {
                 .andExpect(jsonPath("$[2].code").value("TT-ZZZ999"));
     }
 
+    @Test
+    void nonAdminCannotListClients() throws Exception {
+        mockMvc.perform(get("/api/clients")
+                .header("X-Admin-Code", "TT-CLIENT01"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void missingAdminCodeCannotListClients() throws Exception {
+        mockMvc.perform(get("/api/clients"))
+                .andExpect(status().isBadRequest());
+    }
+
     private MvcResult createClientAsAdmin() throws Exception {
         return mockMvc.perform(post("/api/clients")
                 .header("X-Admin-Code", "TT-ADMIN01"))
