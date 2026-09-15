@@ -13,10 +13,17 @@ public class Client {
     @Column(nullable = false, length = 64)
     private String code;
 
+    @Column(length = 100)
+    private String name;
+
+    @Column(nullable = false)
+    private boolean active = true;
+
     @Column(nullable = false)
     private boolean admin;
 
-    protected Client() {}
+    protected Client() {
+    }
 
     public Client(String code, boolean admin) {
         this.code = code;
