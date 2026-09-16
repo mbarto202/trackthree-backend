@@ -26,8 +26,14 @@ public class Client {
     }
 
     public Client(String code, boolean admin) {
+        this(code, null, admin);
+    }
+
+    public Client(String code, String name, boolean admin) {
         this.code = code;
+        this.name = name;
         this.admin = admin;
+        this.active = true;
     }
 
     public String getCode() {
@@ -36,5 +42,17 @@ public class Client {
 
     public boolean isAdmin() {
         return admin;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }
