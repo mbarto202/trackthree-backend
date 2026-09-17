@@ -55,4 +55,8 @@ public class Client {
     public void setActive(boolean active) {
         this.active = active;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }
