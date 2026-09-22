@@ -16,13 +16,23 @@ public class ClientDataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        addClientIfMissing("TT-BUZZ99", true);
-        addClientIfMissing("TT-DEMO00", false);
+        addClientIfMissing("TT-BUZZ99", "Bartobuild Admin", true);
+        addClientIfMissing("TT-DEMO00", "Demo Client", false);
     }
 
-    private void addClientIfMissing(String code, boolean admin) {
-        if (!clientRepository.existsById(code)) {
-            clientRepository.save(new Client(code, admin));
-        }
+    private void addClientIfMissing(String code, String name, boolean admin) {
+    var existingClient = clientRepository.findById(code);
+
+    if (existingClient.isEmpty()) {
+        clientRepository.save(new Client(code, name, admin));
+        return;
     }
+
+    Client client = existingClient.get();
+
+    if (client.getName() == null || client.getName().isBlank()) {
+        client.setName(name);
+        clientRepository.save(client);
+    }
+}
 }
