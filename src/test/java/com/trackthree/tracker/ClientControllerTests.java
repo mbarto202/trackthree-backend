@@ -15,6 +15,7 @@ import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.same;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,8 +37,10 @@ class ClientControllerTests {
     @BeforeEach
     void setUp() {
         clientRepository.deleteAll();
-        clientRepository.save(new Client("TT-ADMIN01", true));
-        clientRepository.save(new Client("TT-CLIENT01", false));
+        clientRepository.save(new Client("TT-ADMIN01", "Test Admin", true));
+        clientRepository.save(new Client("TT-CLIENT01", "Test Client", false));
+        clientRepository.save(new Client("TT-AAA111", "Alice Client", false));
+        clientRepository.save(new Client("TT-ZZZ999", "Zoe Client", false));
     }
 
     @Test
