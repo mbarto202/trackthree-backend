@@ -25,27 +25,27 @@ class TrackerControllerValidationTests {
     @BeforeEach
     void setUp() {
         clientRepository.deleteAll();
-        clientRepository.save(new Client("TT-CLIENT01", false));
+        clientRepository.save(new Client("TT-CLIENT01", "Test Client", false));
     }
 
     @Test
     void acceptsClientCodeStoredInDatabase() throws Exception {
         mockMvc.perform(get("/api/tracker/validate")
-                        .param("clientCode", "TT-CLIENT01"))
+                .param("clientCode", "TT-CLIENT01"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void rejectsClientCodeNotStoredInDatabase() throws Exception {
         mockMvc.perform(get("/api/tracker/validate")
-                        .param("clientCode", "TT-UNKNOWN"))
+                .param("clientCode", "TT-UNKNOWN"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void rejectsBlankClientCode() throws Exception {
         mockMvc.perform(get("/api/tracker/validate")
-                        .param("clientCode", " "))
+                .param("clientCode", " "))
                 .andExpect(status().isBadRequest());
     }
 }
