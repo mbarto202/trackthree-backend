@@ -39,8 +39,6 @@ class ClientControllerTests {
         clientRepository.deleteAll();
         clientRepository.save(new Client("TT-ADMIN01", "Test Admin", true));
         clientRepository.save(new Client("TT-CLIENT01", "Test Client", false));
-        clientRepository.save(new Client("TT-AAA111", "Alice Client", false));
-        clientRepository.save(new Client("TT-ZZZ999", "Zoe Client", false));
     }
 
     @Test
@@ -82,8 +80,8 @@ class ClientControllerTests {
 
     @Test
     void adminCanListRegularClients() throws Exception {
-        clientRepository.save(new Client("TT-AAA111", false));
-        clientRepository.save(new Client("TT-ZZZ999", false));
+        clientRepository.save(new Client("TT-AAA111", "Alice Client", false));
+        clientRepository.save(new Client("TT-ZZZ999", "Zoe Client", false));
 
         mockMvc.perform(get("/api/clients")
                 .header("X-Admin-Code", "TT-ADMIN01"))
