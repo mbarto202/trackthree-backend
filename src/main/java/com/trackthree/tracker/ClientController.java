@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.trackthree.tracker.model.Client;
 import com.trackthree.tracker.repository.ClientRepository;
@@ -25,15 +26,27 @@ public class ClientController {
 
     @PostMapping
     public ResponseEntity<?> createClient(
-            @RequestHeader("X-Admin-Code") String adminCode) {
+            @RequestHeader("X-Admin-Code") String adminCode, @RequestBody CreateClientRequest request) {
 
         if (!isAdmin(adminCode)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("Admin access required");
         }
 
+        if (request.name() == null || request.name().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body("name is required");
+        }
+
+        String clientName = request.name().trim();
+
+        if (clientName.length() > 100) {
+            return ResponseEntity.badRequest()
+                    .body("name must be 100 characters or fewer");
+        }
+
         String clientCode = generateUniqueClientCode();
-        Client client = new Client(clientCode, false);
+        Client client = new Client(clientCode, clientName, false);
         clientRepository.save(client);
 
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -72,5 +85,8 @@ public class ClientController {
         } while (clientRepository.existsById(code));
 
         return code;
+    }
+
+    public record CreateClientRequest(String name) {
     }
 }
