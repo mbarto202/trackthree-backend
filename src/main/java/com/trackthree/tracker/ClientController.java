@@ -26,7 +26,8 @@ public class ClientController {
 
     @PostMapping
     public ResponseEntity<?> createClient(
-            @RequestHeader("X-Admin-Code") String adminCode, @RequestBody CreateClientRequest request) {
+            @RequestHeader("X-Admin-Code") String adminCode,
+            @RequestBody CreateClientRequest request) {
 
         if (!isAdmin(adminCode)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
