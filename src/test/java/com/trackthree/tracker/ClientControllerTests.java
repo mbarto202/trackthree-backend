@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.http.MediaType;
 
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.hasSize;
@@ -44,9 +45,13 @@ class ClientControllerTests {
     @Test
     void adminCanCreateClient() throws Exception {
         MvcResult result = mockMvc.perform(post("/api/clients")
-                .header("X-Admin-Code", "TT-ADMIN01"))
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"New Client\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.code").value(matchesPattern("TT-[0-9A-F]{6}")))
+                .andExpect(jsonPath("$.name").value("New Client"))
+                .andExpect(jsonPath("$.active").value(true))
                 .andExpect(jsonPath("$.admin").value(false))
                 .andReturn();
 
