@@ -62,7 +62,9 @@ class ClientControllerTests {
     @Test
     void nonAdminCannotCreateClient() throws Exception {
         mockMvc.perform(post("/api/clients")
-                .header("X-Admin-Code", "TT-CLIENT01"))
+                .header("X-Admin-Code", "TT-CLIENT01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"New Client\"}"))
                 .andExpect(status().isForbidden());
     }
 
