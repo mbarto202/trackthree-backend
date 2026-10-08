@@ -16,7 +16,6 @@ import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.same;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -70,7 +69,9 @@ class ClientControllerTests {
 
     @Test
     void missingAdminCodeIsRejected() throws Exception {
-        mockMvc.perform(post("/api/clients"))
+        mockMvc.perform(post("/api/clients")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"New Client\"}"))
                 .andExpect(status().isBadRequest());
     }
 
