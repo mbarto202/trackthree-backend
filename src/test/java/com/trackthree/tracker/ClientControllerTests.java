@@ -115,7 +115,9 @@ class ClientControllerTests {
 
     private MvcResult createClientAsAdmin() throws Exception {
         return mockMvc.perform(post("/api/clients")
-                .header("X-Admin-Code", "TT-ADMIN01"))
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"Generated Client\"}"))
                 .andExpect(status().isCreated())
                 .andReturn();
     }
