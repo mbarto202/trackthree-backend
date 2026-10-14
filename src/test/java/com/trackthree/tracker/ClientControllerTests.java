@@ -113,6 +113,15 @@ class ClientControllerTests {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void blankClientNameIsRejected() throws Exception {
+        mockMvc.perform(post("/api/clients")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"   \"}"))
+                .andExpect(status().isBadRequest());
+    }
+
     private MvcResult createClientAsAdmin() throws Exception {
         return mockMvc.perform(post("/api/clients")
                 .header("X-Admin-Code", "TT-ADMIN01")
