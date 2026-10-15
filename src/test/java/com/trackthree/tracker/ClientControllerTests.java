@@ -122,6 +122,17 @@ class ClientControllerTests {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void longClientNameIsRejected() throws Exception {
+        String longName = "A".repeat(101);
+
+        mockMvc.perform(post("/api/clients")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"" + longName + "\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
     private MvcResult createClientAsAdmin() throws Exception {
         return mockMvc.perform(post("/api/clients")
                 .header("X-Admin-Code", "TT-ADMIN01")
