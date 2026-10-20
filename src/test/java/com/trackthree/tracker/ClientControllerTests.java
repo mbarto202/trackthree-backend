@@ -133,6 +133,16 @@ class ClientControllerTests {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void clientNameIsTrimmedBeforeSaving() throws Exception {
+        mockMvc.perform(post("/api/clients")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"  Jane Smith  \"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Jane Smith"));
+    }
+
     private MvcResult createClientAsAdmin() throws Exception {
         return mockMvc.perform(post("/api/clients")
                 .header("X-Admin-Code", "TT-ADMIN01")
