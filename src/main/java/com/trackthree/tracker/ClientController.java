@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.trackthree.tracker.model.Client;
 import com.trackthree.tracker.repository.ClientRepository;
@@ -67,6 +69,41 @@ public class ClientController {
                 clientRepository.findAllByAdminFalseOrderByCodeAsc());
     }
 
+    @PatchMapping("/{clientCode}/active")
+    public ResponseEntity<?> updateClientActiveStatus(
+            @RequestHeader("X-Admin-Code") String adminCode,
+            @PathVariable String clientCode,
+            @RequestBody UpdateActiveRequest request) {
+
+        if (!isAdmin(adminCode)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Admin access required");
+        }
+
+        var existingClient = clientRepository.findById(clientCode);
+
+        if (existingClient.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Client client = existingClient.get();
+
+        if (client.isAdmin()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Admin status cannot be changed");
+        }
+
+        if (request.active() == null) {
+            return ResponseEntity.badRequest()
+                    .body("active is required");
+        }
+
+        client.setActive(request.active());
+        clientRepository.save(client);
+
+        return ResponseEntity.ok(client);
+    }
+
     private boolean isAdmin(String clientCode) {
         return clientRepository.findById(clientCode)
                 .map(Client::isAdmin)
@@ -89,5 +126,8 @@ public class ClientController {
     }
 
     public record CreateClientRequest(String name) {
+    }
+
+    public record UpdateActiveRequest(Boolean active) {
     }
 }
