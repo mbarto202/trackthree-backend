@@ -11,6 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.http.MediaType;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.hasSize;
@@ -141,6 +143,21 @@ class ClientControllerTests {
                 .content("{\"name\":\"  Jane Smith  \"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Jane Smith"));
+    }
+
+    @Test
+    void adminCanDeactivateClient() throws Exception {
+        mockMvc.perform(patch("/api/clients/TT-CLIENT01/active")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"active\":false}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.active").value(false));
+
+        Client client = clientRepository.findById("TT-CLIENT01")
+                .orElseThrow();
+
+        assertFalse(client.isActive());
     }
 
     private MvcResult createClientAsAdmin() throws Exception {
