@@ -160,6 +160,27 @@ class ClientControllerTests {
         assertFalse(client.isActive());
     }
 
+    @Test
+    void adminCanReactivateClient() throws Exception {
+        Client client = clientRepository.findById("TT-CLIENT01")
+                .orElseThrow();
+
+        client.setActive(false);
+        clientRepository.save(client);
+
+        mockMvc.perform(patch("/api/clients/TT-CLIENT01/active")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"active\":true}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.active").value(true));
+
+        Client updatedClient = clientRepository.findById("TT-CLIENT01")
+                .orElseThrow();
+
+        assertTrue(updatedClient.isActive());
+    }
+
     private MvcResult createClientAsAdmin() throws Exception {
         return mockMvc.perform(post("/api/clients")
                 .header("X-Admin-Code", "TT-ADMIN01")
