@@ -181,6 +181,15 @@ class ClientControllerTests {
         assertTrue(updatedClient.isActive());
     }
 
+    @Test
+    void nonAdminCannotChangeClientStatus() throws Exception {
+        mockMvc.perform(patch("/api/clients/TT-CLIENT01/active")
+                .header("X-Admin-Code", "TT-CLIENT01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"active\":false}"))
+                .andExpect(status().isForbidden());
+    }
+
     private MvcResult createClientAsAdmin() throws Exception {
         return mockMvc.perform(post("/api/clients")
                 .header("X-Admin-Code", "TT-ADMIN01")
