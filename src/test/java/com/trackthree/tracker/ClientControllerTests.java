@@ -190,6 +190,15 @@ class ClientControllerTests {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    void unknownClientStatusCannotBeChanged() throws Exception {
+        mockMvc.perform(patch("/api/clients/TT-UNKNOWN/active")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"active\":false}"))
+                .andExpect(status().isNotFound());
+    }
+
     private MvcResult createClientAsAdmin() throws Exception {
         return mockMvc.perform(post("/api/clients")
                 .header("X-Admin-Code", "TT-ADMIN01")
