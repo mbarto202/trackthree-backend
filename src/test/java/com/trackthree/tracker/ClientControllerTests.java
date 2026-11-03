@@ -199,6 +199,15 @@ class ClientControllerTests {
                 .andExpect(status().isNotFound());
     }
 
+    @Test
+    void adminAccountStatusCannotBeChanged() throws Exception {
+        mockMvc.perform(patch("/api/clients/TT-ADMIN01/active")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"active\":false}"))
+                .andExpect(status().isForbidden());
+    }
+
     private MvcResult createClientAsAdmin() throws Exception {
         return mockMvc.perform(post("/api/clients")
                 .header("X-Admin-Code", "TT-ADMIN01")
