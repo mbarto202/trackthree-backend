@@ -208,6 +208,15 @@ class ClientControllerTests {
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    void missingActiveValueIsRejected() throws Exception {
+        mockMvc.perform(patch("/api/clients/TT-CLIENT01/active")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
     private MvcResult createClientAsAdmin() throws Exception {
         return mockMvc.perform(post("/api/clients")
                 .header("X-Admin-Code", "TT-ADMIN01")
