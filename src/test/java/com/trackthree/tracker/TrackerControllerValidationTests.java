@@ -48,4 +48,17 @@ class TrackerControllerValidationTests {
                 .param("clientCode", " "))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void rejectsInactiveClientCode() throws Exception {
+        Client client = clientRepository.findById("TT-CLIENT01")
+                .orElseThrow();
+
+        client.setActive(false);
+        clientRepository.save(client);
+
+        mockMvc.perform(get("/api/tracker/validate")
+                .param("clientCode", "TT-CLIENT01"))
+                .andExpect(status().isForbidden());
+    }
 }
