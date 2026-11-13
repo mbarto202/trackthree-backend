@@ -1,0 +1,133 @@
+package com.trackthree.tracker;
+
+import java.util.UUID;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+import com.trackthree.tracker.model.Client;
+import com.trackthree.tracker.repository.ClientRepository;
+
+@RestController
+@RequestMapping("/api/clients")
+public class ClientController {
+
+    private final ClientRepository clientRepository;
+
+    public ClientController(ClientRepository clientRepository) {
+        this.clientRepository = clientRepository;
+    }
+
+    @PostMapping
+    public ResponseEntity<?> createClient(
+            @RequestHeader("X-Admin-Code") String adminCode,
+            @RequestBody CreateClientRequest request) {
+
+        if (!isAdmin(adminCode)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Admin access required");
+        }
+
+        if (request.name() == null || request.name().isBlank()) {
+            return ResponseEntity.badRequest()
+                    .body("name is required");
+        }
+
+        String clientName = request.name().trim();
+
+        if (clientName.length() > 100) {
+            return ResponseEntity.badRequest()
+                    .body("name must be 100 characters or fewer");
+        }
+
+        String clientCode = generateUniqueClientCode();
+        Client client = new Client(clientCode, clientName, false);
+        clientRepository.save(client);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(client);
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getClients(
+            @RequestHeader("X-Admin-Code") String adminCode) {
+
+        if (!isAdmin(adminCode)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Admin access required");
+        }
+
+        return ResponseEntity.ok(
+                clientRepository.findAllByAdminFalseOrderByCodeAsc());
+    }
+
+    @PatchMapping("/{clientCode}/active")
+    public ResponseEntity<?> updateClientActiveStatus(
+            @RequestHeader("X-Admin-Code") String adminCode,
+            @PathVariable String clientCode,
+            @RequestBody UpdateActiveRequest request) {
+
+        if (!isAdmin(adminCode)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Admin access required");
+        }
+
+        var existingClient = clientRepository.findById(clientCode);
+
+        if (existingClient.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Client client = existingClient.get();
+
+        if (client.isAdmin()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Admin status cannot be changed");
+        }
+
+        if (request.active() == null) {
+            return ResponseEntity.badRequest()
+                    .body("active is required");
+        }
+
+        client.setActive(request.active());
+        clientRepository.save(client);
+
+        return ResponseEntity.ok(client);
+    }
+
+    private boolean isAdmin(String clientCode) {
+        return clientRepository.findById(clientCode)
+                .map(Client::isAdmin)
+                .orElse(false);
+    }
+
+    private String generateUniqueClientCode() {
+        String code;
+
+        do {
+            String randomPart = UUID.randomUUID()
+                    .toString()
+                    .substring(0, 6)
+                    .toUpperCase();
+
+            code = "TT-" + randomPart;
+        } while (clientRepository.existsById(code));
+
+        return code;
+    }
+
+    public record CreateClientRequest(String name) {
+    }
+
+    public record UpdateActiveRequest(Boolean active) {
+    }
+}

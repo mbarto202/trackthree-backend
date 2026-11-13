@@ -1,0 +1,241 @@
+package com.trackthree.tracker;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trackthree.tracker.model.Client;
+import com.trackthree.tracker.repository.ClientRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.http.MediaType;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+class ClientControllerTests {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ClientRepository clientRepository;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setUp() {
+        clientRepository.deleteAll();
+        clientRepository.save(new Client("TT-ADMIN01", "Test Admin", true));
+        clientRepository.save(new Client("TT-CLIENT01", "Test Client", false));
+    }
+
+    @Test
+    void adminCanCreateClient() throws Exception {
+        MvcResult result = mockMvc.perform(post("/api/clients")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"New Client\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.code").value(matchesPattern("TT-[0-9A-F]{6}")))
+                .andExpect(jsonPath("$.name").value("New Client"))
+                .andExpect(jsonPath("$.active").value(true))
+                .andExpect(jsonPath("$.admin").value(false))
+                .andReturn();
+
+        String generatedCode = readGeneratedCode(result);
+        assertTrue(clientRepository.existsById(generatedCode));
+    }
+
+    @Test
+    void nonAdminCannotCreateClient() throws Exception {
+        mockMvc.perform(post("/api/clients")
+                .header("X-Admin-Code", "TT-CLIENT01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"New Client\"}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void missingAdminCodeIsRejected() throws Exception {
+        mockMvc.perform(post("/api/clients")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"New Client\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void eachClientGetsDifferentCode() throws Exception {
+        MvcResult firstResult = createClientAsAdmin();
+        MvcResult secondResult = createClientAsAdmin();
+
+        String firstCode = readGeneratedCode(firstResult);
+        String secondCode = readGeneratedCode(secondResult);
+
+        assertNotEquals(firstCode, secondCode);
+    }
+
+    @Test
+    void adminCanListRegularClients() throws Exception {
+        clientRepository.save(new Client("TT-AAA111", "Alice Client", false));
+        clientRepository.save(new Client("TT-ZZZ999", "Zoe Client", false));
+
+        mockMvc.perform(get("/api/clients")
+                .header("X-Admin-Code", "TT-ADMIN01"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[0].code").value("TT-AAA111"))
+                .andExpect(jsonPath("$[1].code").value("TT-CLIENT01"))
+                .andExpect(jsonPath("$[2].code").value("TT-ZZZ999"));
+    }
+
+    @Test
+    void nonAdminCannotListClients() throws Exception {
+        mockMvc.perform(get("/api/clients")
+                .header("X-Admin-Code", "TT-CLIENT01"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void missingAdminCodeCannotListClients() throws Exception {
+        mockMvc.perform(get("/api/clients"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void blankClientNameIsRejected() throws Exception {
+        mockMvc.perform(post("/api/clients")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"   \"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void longClientNameIsRejected() throws Exception {
+        String longName = "A".repeat(101);
+
+        mockMvc.perform(post("/api/clients")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"" + longName + "\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void clientNameIsTrimmedBeforeSaving() throws Exception {
+        mockMvc.perform(post("/api/clients")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"  Jane Smith  \"}"))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.name").value("Jane Smith"));
+    }
+
+    @Test
+    void adminCanDeactivateClient() throws Exception {
+        mockMvc.perform(patch("/api/clients/TT-CLIENT01/active")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"active\":false}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.active").value(false));
+
+        Client client = clientRepository.findById("TT-CLIENT01")
+                .orElseThrow();
+
+        assertFalse(client.isActive());
+    }
+
+    @Test
+    void adminCanReactivateClient() throws Exception {
+        Client client = clientRepository.findById("TT-CLIENT01")
+                .orElseThrow();
+
+        client.setActive(false);
+        clientRepository.save(client);
+
+        mockMvc.perform(patch("/api/clients/TT-CLIENT01/active")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"active\":true}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.active").value(true));
+
+        Client updatedClient = clientRepository.findById("TT-CLIENT01")
+                .orElseThrow();
+
+        assertTrue(updatedClient.isActive());
+    }
+
+    @Test
+    void nonAdminCannotChangeClientStatus() throws Exception {
+        mockMvc.perform(patch("/api/clients/TT-CLIENT01/active")
+                .header("X-Admin-Code", "TT-CLIENT01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"active\":false}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void unknownClientStatusCannotBeChanged() throws Exception {
+        mockMvc.perform(patch("/api/clients/TT-UNKNOWN/active")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"active\":false}"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void adminAccountStatusCannotBeChanged() throws Exception {
+        mockMvc.perform(patch("/api/clients/TT-ADMIN01/active")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"active\":false}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void missingActiveValueIsRejected() throws Exception {
+        mockMvc.perform(patch("/api/clients/TT-CLIENT01/active")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void missingAdminCodeCannotChangeClientStatus() throws Exception {
+        mockMvc.perform(patch("/api/clients/TT-CLIENT01/active")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"active\":false}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    private MvcResult createClientAsAdmin() throws Exception {
+        return mockMvc.perform(post("/api/clients")
+                .header("X-Admin-Code", "TT-ADMIN01")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"name\":\"Generated Client\"}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+    }
+
+    private String readGeneratedCode(MvcResult result) throws Exception {
+        String responseBody = result.getResponse().getContentAsString();
+        return objectMapper.readTree(responseBody).get("code").asText();
+    }
+}

@@ -121,7 +121,9 @@ public class TrackerController {
     }
 
     private boolean isValidClientCode(String clientCode) {
-        return clientRepository.existsById(clientCode);
+        return clientRepository.findById(clientCode)
+                .map(Client::isActive)
+                .orElse(false);
     }
 
     private boolean isAdmin(String clientCode) {
